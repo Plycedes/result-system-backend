@@ -21,7 +21,7 @@ const generateAccessTokenAndRefreshToken = async (adminId) => {
   }
 };
 
-const loginUser = asyncHandler(async (req, res) => {
+const loginAdmin = asyncHandler(async (req, res) => {
   const { username, password } = req.body;
 
   if (!username && !password) {
@@ -67,6 +67,53 @@ const loginUser = asyncHandler(async (req, res) => {
         "User logged in successfully"
       )
     );
+});
+
+const logoutAdmin = asyncHandler(async (req, res) => {
+  await Admin.findByInAndUpdate(
+    req.user._id,
+    {
+      $unset: {
+        refreshToken: 1,
+      },
+    },
+    {
+      new: true,
+    }
+  );
+
+  const options = {
+    httpOnly: true,
+    secure: true,
+  };
+
+  return res
+    .status(200)
+    .clearCookie("accessToken", options)
+    .clearCookie("refreshToken", options)
+    .json(new ApiResponse(200, {}, "Admin loggedout successfully"));
+});
+
+const changePassword = asyncHandler(async (req, res) => {
+  const { oldPassword, newPassword } = req.body;
+
+  if (!oldPassword || !newPassword) {
+    throw new ApiError(401, "Old or New Password missing");
+  }
+
+  const admin = await Admin.findById(req.user?._id);
+  const isPasswordValid = await admin.isPasswordCorrect(oldPassword);
+
+  if (!isPasswordValid) {
+    throw new ApiError(400, "Invalid old password");
+  }
+
+  admin.password = newPassword;
+  await user.save({ validateBeforeSave: false });
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, {}, "Password changed successfully"));
 });
 
 const setResult = asyncHandler(async (req, res) => {
@@ -115,4 +162,4 @@ const setResult = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, resultAdded, "Result Added Successfully"));
 });
 
-export { setResult };
+export { setResult, loginAdmin, logoutAdmin, changePassword };
