@@ -2,6 +2,7 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { Result } from "../models/result.model.js";
+import { Admin } from "../models/admin.model.js";
 
 const generateAccessTokenAndRefreshToken = async (adminId) => {
   try {
@@ -12,7 +13,7 @@ const generateAccessTokenAndRefreshToken = async (adminId) => {
     admin.refreshToken = refreshToken;
     await admin.save({ validateBeforeSave: false });
 
-    return accessToken, refreshToken;
+    return { accessToken, refreshToken };
   } catch (error) {
     throw new ApiError(
       500,
@@ -32,7 +33,7 @@ const loginAdmin = asyncHandler(async (req, res) => {
     $or: [{ username }],
   });
 
-  if (!user) {
+  if (!admin) {
     throw new ApiError(404, "Admin not registered");
   }
 
@@ -55,7 +56,7 @@ const loginAdmin = asyncHandler(async (req, res) => {
   return res
     .status(200)
     .cookie("accessToken", accessToken, options)
-    .cookie("refreshToken".refreshToken, options)
+    .cookie("refreshToken", refreshToken, options)
     .json(
       new ApiResponse(
         200,

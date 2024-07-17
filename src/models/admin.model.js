@@ -1,4 +1,6 @@
-import mongoose from "mongoose";
+import mongoose, { Schema } from "mongoose";
+import jwt from "jsonwebtoken";
+import bcrypt from "bcrypt";
 
 const adminSchema = new Schema(
   {
@@ -18,6 +20,9 @@ const adminSchema = new Schema(
       type: Boolean,
       required: true,
     },
+    refreshToken: {
+      type: String,
+    },
   },
   { timestamps: true }
 );
@@ -30,7 +35,7 @@ adminSchema.pre("save", async function (next) {
   next();
 });
 
-adminSchema.methods.isPasswordCorrect = async function (pasword) {
+adminSchema.methods.isPasswordCorrect = async function (password) {
   if (this.firstlogin) {
     return password === this.password;
   }
