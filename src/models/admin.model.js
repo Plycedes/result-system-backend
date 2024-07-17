@@ -14,6 +14,10 @@ const adminSchema = new Schema(
       type: String,
       required: [true, "Password is required"],
     },
+    firstlogin: {
+      type: Boolean,
+      required: true,
+    },
   },
   { timestamps: true }
 );
@@ -22,10 +26,14 @@ adminSchema.pre("save", async function (next) {
   if (!this.isModified("password")) return next();
 
   this.password = await bcrypt.hash(this.password, 10);
+  this.firstlogin = false;
   next();
 });
 
 adminSchema.methods.isPasswordCorrect = async function (pasword) {
+  if (this.firstlogin) {
+    return password === this.password;
+  }
   return await bcrypt.compare(password, this.password);
 };
 
