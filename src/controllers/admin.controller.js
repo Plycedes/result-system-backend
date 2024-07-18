@@ -71,7 +71,7 @@ const loginAdmin = asyncHandler(async (req, res) => {
 });
 
 const logoutAdmin = asyncHandler(async (req, res) => {
-  await Admin.findByInAndUpdate(
+  await Admin.findByIdAndUpdate(
     req.user._id,
     {
       $unset: {
@@ -110,7 +110,7 @@ const changePassword = asyncHandler(async (req, res) => {
   }
 
   admin.password = newPassword;
-  await user.save({ validateBeforeSave: false });
+  await admin.save({ validateBeforeSave: false });
 
   return res
     .status(200)
