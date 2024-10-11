@@ -16,6 +16,10 @@ app.use(express.urlencoded({ extended: true, limit: "16kb" }));
 app.use(express.static("public"));
 app.use(cookieParser());
 
+app.get("/", (req, res) => {
+  res.send({ status: "OK", statusCode: 200 });
+});
+
 //routes import
 import resultRouter from "./routes/student.router.js";
 import adminRouter from "./routes/admin.router.js";
